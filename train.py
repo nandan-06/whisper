@@ -11,6 +11,59 @@ from typing import Any, Dict, List, Union
 import evaluate
 from datasets import Dataset, Audio, Value
 
+import os
+
+# Define the directory containing your text files
+text_files_directory = './extracted_data/svarah/audio/'
+
+# Define the output file paths for scp_entries and txt_entries
+scp_entries_file = 'scp_entries.txt'
+txt_entries_file = 'txt_entries.txt'
+
+# Initialize lists to store entries
+scp_entries = []
+txt_entries = []
+
+# Set the limit for the number of instances you want to add
+limit_instances = 3000
+
+# Iterate through text files in the directory
+for text_file_name in os.listdir(text_files_directory):
+    if text_file_name.endswith('.txt'):
+        text_file_path = os.path.join(text_files_directory, text_file_name)
+        with open(text_file_path, 'r') as text_content:
+            for line in text_content:
+                parts = line.strip().split('\t')
+                if len(parts) == 3:
+                    audio_path, audio_id, transcription = parts
+                    audio_path = os.path.join(audio_path)  # You may need to adjust this based on your folder structure
+
+                    # Create an entry for scp_entries
+                    scp_entry = f"{audio_id} ./extracted_data/svarah/audio/{audio_path}\n"
+                    scp_entries.append(scp_entry)
+
+                    # Create an entry for txt_entries
+                    txt_entry = f"{audio_id} {transcription}\n"
+                    txt_entries.append(txt_entry)
+
+                if len(scp_entries) >= limit_instances:
+                    # If the limit is reached, break out of the loop
+                    break
+
+    if len(scp_entries) >= limit_instances:
+        # If the limit is reached, break out of the loop
+        break
+
+# Write the scp_entries and txt_entries to their respective files
+with open(scp_entries_file, 'w') as scp_file:
+    scp_file.writelines(scp_entries)
+
+with open(txt_entries_file, 'w') as txt_file:
+    txt_file.writelines(txt_entries)
+
+print(f'SCP entries have been written to {scp_entries_file}')
+print(f'Text entries have been written to {txt_entries_file}')
+
 scp_entries = open('./extracted_data/scp_entries.txt', 'r').readlines()
 txt_entries = open("/extracted_data/txt_entries.txt", 'r').readlines()
 
